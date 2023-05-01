@@ -1,18 +1,14 @@
 import { useContext, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../utils/context/authContext";
-import "./nav.css";
-
 import {
-  ContactsFilled,
   LoginOutlined,
   LogoutOutlined,
   PlusCircleFilled,
-  ShoppingCartOutlined,
   ThunderboltOutlined,
-  UserOutlined,
+  HomeOutlined
 } from "@ant-design/icons";
-import { Layout, Menu } from "antd";
+import { Layout, Menu, Divider, Image } from "antd";
 import React, { useState } from "react";
 
 const Navbar = () => {
@@ -21,117 +17,156 @@ const Navbar = () => {
   const onClick = (e) => {
     console.log("click ", e);
     setCurrent(e.key);
+    if (e.key === 'logout') {
+      handleLogout()
+    }
   };
+
+  const { user, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
+  useEffect(() => {
+    console.log("user", user);
+  }, [user]);
+
+  const styles = {
+    nav: {
+      position: "relative",
+      display: "flex",
+      justifyContent: "right",
+      alignItems: "flex-end"
+    },
+    logo: {
+      position: 'absolute',
+      bottom: '1vh',
+    }
+  }
+
+  let items;
+
+  if (user?.data.isAdmin) {
+    items = [
+      {
+        label: (
+          <a href="/" rel="noopener noreferrer">
+            Home
+          </a>
+        ),
+        key: "home",
+        icon: <HomeOutlined />,
+      },
+      {
+        label: <Divider type='vertical' />,
+        disabled: true,
+        style: { cursor: 'auto' }
+
+      },
+      {
+        label: "Admin Options",
+        key: "SubMenu",
+        icon: <ThunderboltOutlined />,
+        children: [
+          {
+            label: (
+              <a href="/addproduct" rel="noopener noreferrer">
+                Add/Edit Products
+              </a>
+            ),
+            key: "addproduct",
+            icon: <PlusCircleFilled />,
+          }
+        ],
+      },
+      {
+        label: <Divider type='vertical' />,
+        disabled: true,
+        style: { cursor: 'auto' }
+
+      },
+      {
+        label: "Logout",
+        key: "logout",
+        icon: <LogoutOutlined />,
+
+      }
+    ]
+  } else if (user === null) {
+    items = [
+      {
+        label: (
+          <a href="/" rel="noopener noreferrer">
+            Home
+          </a>
+        ),
+        key: "home",
+        icon: <HomeOutlined />,
+      },
+      {
+        label: <Divider type='vertical' />,
+        disabled: true,
+        style: { cursor: 'auto' }
+
+      },
+      {
+        label: (
+          <a href="/login" rel="noopener noreferrer">
+            Login
+          </a>
+        ),
+        key: "login",
+        icon: <LoginOutlined />,
+      }]
+  } else if (!user?.data.isAdmin) {
+    items = [
+      {
+        label: (
+          <a href="/" rel="noopener noreferrer">
+            Home
+          </a>
+        ),
+        key: "home",
+        icon: <HomeOutlined />,
+      },
+      {
+        label: <Divider type='vertical' />,
+        disabled: true,
+        style: { cursor: 'auto' }
+
+      },
+      {
+        label: "Logout",
+        key: "logout",
+        icon: <LogoutOutlined />,
+
+      }
+    ]
+  }
 
   return (
     <Layout>
+
       <Menu
-        style={style}
+        style={styles.nav}
         onClick={onClick}
         selectedKeys={[current]}
         mode="horizontal"
         items={items}
       />
+            <Image
+        style={styles.logo}
+        width={100}
+        preview={false}
+        src="https://res.cloudinary.com/dbnrnwpje/image/upload/v1682885252/ora61jpc45dgsbe3sl0q.png"
+      />
     </Layout>
   );
-  // const { user, logout } = useContext(AuthContext);
-  // const navigate = useNavigate();
-
-  // const handleLogout = () => {
-  //   logout();
-  //   navigate("/");
-  // };
-
-  // useEffect(() => {
-  //   console.log("user", user);
-  // }, [user]);
-
-  // return (
-  //   <nav>
-  //     <div className="nav-container">
-  //       <ul className="nav-menu">
-  //         <li>
-  //           <Link to="/">Home</Link>
-  //         </li>
-  //         <li></li>
-  //         {user ? (
-  //           <>
-  //             <li>
-  //               <button onClick={handleLogout}>Logout</button>
-  //             </li>
-  //           </>
-  //         ) : (
-  //           <>
-  //             <li>
-  //               <Link to="/login">Login / Signup</Link>
-  //             </li>
-  //           </>
-  //         )}
-  //         <li className="search-container">
-  //           <input type="text" placeholder="Search..." />
-  //         </li>
-  //         {user?.data.isAdmin && (
-  //           <li>
-  //             <Link to="/admin">Admin</Link>
-  //           </li>
-  //         )}
-  //         <li>
-  //           <Link to="/cart">Cart</Link>
-  //         </li>
-  //       </ul>
-  //     </div>
-  //   </nav>
-  // );
 };
 
-const style = {
-  position: "relative",
-  display: "flex",
-  justifyContent: "right",
-};
 
-const items = [
-  // {
-  //   label: 'Title',
-  //   key: 'title'
-  // },
-  {
-    label: "Admin Options",
-    key: "SubMenu",
-    icon: <ThunderboltOutlined />,
-    children: [
-      {
-        label: "Add/Edit Products",
-        key: "setting:1",
-        icon: <PlusCircleFilled />,
-      },
-      {
-        label: "Edit Profile",
-        key: "setting:2",
-        icon: <ContactsFilled />,
-      },
-    ],
-  },
-  {
-    label: "Edit Profile",
-    key: "edit profile",
-    icon: <UserOutlined />,
-  },
-  {
-    label: "Login",
-    key: "login",
-    icon: <LoginOutlined />,
-  },
-  {
-    label: "Logout",
-    key: "logout",
-    icon: <LogoutOutlined />,
-  },
-  // {
-  //   label: 'Cart',
-  //   key: 'cart',
-  //   icon: <ShoppingCartOutlined />,
-  // },
-];
 
 export default Navbar;
